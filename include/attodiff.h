@@ -12,5 +12,5 @@ Tensor *atto_ones(int *size, int lensz);
 void atto_print_flat(char t, void *arr, int len);
 void atto_print(Tensor *a);
 int atto_are_broadcastable(Tensor *a, Tensor *b);
-Tensor *view(Tensor *a, int *size, int lensz);
+Tensor *atto_view(Tensor *a, int *size, int lensz);
 #endif

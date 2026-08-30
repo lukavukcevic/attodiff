@@ -102,7 +102,7 @@ int atto_are_broadcastable(Tensor *a, Tensor *b) {
   return 1;
 }
 ;
-Tensor *view(Tensor *a, int *size, int lensz) {
+Tensor *atto_view(Tensor *a, int *size, int lensz) {
   Tensor *b = malloc(sizeof(Tensor));
   b->data = a->data;
   b->len_data = a->len_data;
