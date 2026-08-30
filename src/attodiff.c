@@ -111,3 +111,12 @@ Tensor *atto_view(Tensor *a, int *size, int lensz) {
   b->strides = atto_calculate_contiguous_strides(size, lensz);
   return b;
 }
+
+float *atto_index(Tensor *a, int *idx) {
+  int flat_idx = 0;
+  for(int i = 0; i < a->len_size; i++) {
+    flat_idx += *(idx + i) * *(a->strides + i);
+  }
+  printf("%d\n", flat_idx);
+  return (a->data + flat_idx);
+}

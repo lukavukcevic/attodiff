@@ -13,4 +13,5 @@ void atto_print_flat(char t, void *arr, int len);
 void atto_print(Tensor *a);
 int atto_are_broadcastable(Tensor *a, Tensor *b);
 Tensor *atto_view(Tensor *a, int *size, int lensz);
+float *atto_index(Tensor *a, int *idx);
 #endif
