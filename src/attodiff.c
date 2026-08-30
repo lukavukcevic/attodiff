@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../include/attodiff.h"
+#include <stddef.h>
 
 int *atto_calculate_contiguous_strides(int *size, int lensz) {
   int *strides = malloc(lensz * sizeof(int));
@@ -113,10 +114,15 @@ Tensor *atto_view(Tensor *a, int *size, int lensz) {
 }
 
 float *atto_index(Tensor *a, int *idx) {
+  for(int i = 0; i < a->len_size; i++) {
+    if(*(idx + i) < 0 || *(idx + i) >= *(a->size + i)) {
+      fprintf(stderr, "IndexError: %d is out of bounds in dimension %d\n", *(idx + i), i);
+      return nullptr;
+    }
+  }
   int flat_idx = 0;
   for(int i = 0; i < a->len_size; i++) {
     flat_idx += *(idx + i) * *(a->strides + i);
   }
-  printf("%d\n", flat_idx);
   return (a->data + flat_idx);
 }
