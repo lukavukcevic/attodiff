@@ -183,7 +183,7 @@ Tensor *atto_add(Tensor *a, Tensor *b) {
   Tensor *bb = atto_broadcast(b, size, lensz);
   Tensor *c = atto_init(size, lensz);
   int *idx = malloc(lensz * sizeof(int));
-  int *suf = atto_calculate_contiguous_strides(size, lensz);
+  int *suf = c->strides;
   for(int i = 0; i < c->len_data; i++) {
     for(int j = 0; j < lensz; j++) {
       *(idx + j) = (i / *(suf + j)) % *(size + j);
