@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../include/attodiff.h"
-#include <stddef.h>
 
 int *atto_calculate_contiguous_strides(int *size, int lensz) {
   int *strides = malloc(lensz * sizeof(int));
@@ -52,24 +51,38 @@ void atto_print_flat(char t, void *arr, int len) {
 }
 
 void atto_print(Tensor *a) {
-  for(int i = 0; i < a->len_data; i++) {
-    for(int j = 0; j < a->len_size; j++) {
-      if(i % (*(a->size + j) * *(a->strides + j)) == 0) {
+  int n = a->len_size;
+  int len_logical = 1;
+  for(int i = 0; i < n; i++) {
+    len_logical *= *(a->size + i);
+  }
+  int *suf = malloc(n * sizeof(int));
+  *(suf + n - 1) = 1;
+  for(int i = n - 2; i >= 0; i--) {
+    *(suf + i) = *(suf + i + 1) * *(a->size + i + 1);
+  }
+  int *idx = malloc(n * sizeof(int));
+  for(int i = 0; i < len_logical; i++) {
+    for(int j = 0; j < n; j++) {
+      *(idx + j) = (i / *(suf + j)) % *(a->size + j);
+    }
+    for(int j = 0; j < n; j++) {
+      if(i % (*(a->size + j) * *(suf + j)) == 0) {
         printf("(");
       }
     }
-    printf("%.1f, ", *(a->data + i));
+    printf("%.1f, ", *atto_index(a, idx));
     int first = 1;
-    for(int j = 0; j < a->len_size; j++) {
-      if((i + 1) % (*(a->size + j) * *(a->strides + j)) == 0) {
+    for(int j = 0; j < n; j++) {
+      if((i + 1) % (*(a->size + j) * *(suf + j)) == 0) {
         if(first) {
           printf("\b\b)");
           first = 0;
         } else {
           printf(")");
         }
-        if(j == a->len_size - 1) {
-          if(i < a->len_data - 1) {
+        if(j == n - 1) {
+          if(i < len_logical - 1) {
             printf(",\n");
           } else {
             printf("\n");
@@ -78,6 +91,8 @@ void atto_print(Tensor *a) {
       }
     }
   }
+  free(suf);
+  free(idx);
 }
 
 int atto_are_broadcastable(Tensor *a, Tensor *b) {
@@ -107,7 +122,8 @@ Tensor *atto_view(Tensor *a, int *size, int lensz) {
   Tensor *b = malloc(sizeof(Tensor));
   b->data = a->data;
   b->len_data = a->len_data;
-  b->size = size;
+  b->size = malloc(lensz * sizeof(int));
+  memcpy(b->size, size, lensz * sizeof(int));
   b->len_size = lensz;
   b->strides = atto_calculate_contiguous_strides(size, lensz);
   return b;
@@ -125,4 +141,18 @@ float *atto_index(Tensor *a, int *idx) {
     flat_idx += *(idx + i) * *(a->strides + i);
   }
   return (a->data + flat_idx);
+}
+
+Tensor *atto_broadcast(Tensor *a, int *size, int lensz) {
+  Tensor *b = malloc(sizeof(Tensor));
+  b->data = a->data;
+  b->len_data = a->len_data;
+  b->size = malloc(lensz * sizeof(int));
+  memcpy(b->size, size, lensz * sizeof(int));
+  b->len_size = lensz;
+  b->strides = calloc(lensz, sizeof(int));
+  for(int i = 0; i < a->len_size; i++) {
+    *(b->strides + lensz - 1 - i) = *(b->size + lensz - 1 - i) > *(a->size + a->len_size - 1 - i) ? 0 : *(a->strides + a->len_size - 1 - i);
+  }
+  return b;
 }
