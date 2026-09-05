@@ -15,4 +15,5 @@ int atto_are_broadcastable(Tensor *a, Tensor *b);
 Tensor *atto_view(Tensor *a, int *size, int lensz);
 float *atto_index(Tensor *a, int *idx);
 Tensor *atto_broadcast(Tensor *a, int *size, int lensz);
+Tensor *atto_add(Tensor *a, Tensor *b);
 #endif
